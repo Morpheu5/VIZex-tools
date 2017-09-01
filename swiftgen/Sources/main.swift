@@ -2,6 +2,7 @@ import Foundation
 import CommandLineKit
 
 let cli = CommandLineKit.CommandLine()
+// Perlin noise is really cool.
 let generator = PerlinGenerator()
 
 let optOctaves = IntOption(shortFlag: "o", longFlag: "octaves", required: true, helpMessage: "Number of octaves")
@@ -21,20 +22,19 @@ generator.octaves = optOctaves.value!
 generator.zoom = Float(optZoom.value!)
 generator.persistence = Float(optPersistence.value!)
 
-let chunkSize = 10
-//let n = chunkSize * 24
-let n = chunkSize*24*365*2
-
+// Maybe these could be parametrised too?
 var timestamp = 1483228800
+let chunkSize = 10
+let n = chunkSize*24*365*2
 
 let rawNoise = (0..<n).map {
 	i in
 	return (10.0/Float(generator.octaves))*(generator.perlinNoise(Float(i)/100, y: Float(i)/100, z: 0, t: 0))
 }
-
-let bias = abs(rawNoise.min()!) + 0.1
+let bias = abs(rawNoise.min()!) + 0.1 // <- totally arbitrary.
 let noise = rawNoise.map { $0 + bias }
 
+// This stride thing makes me all wet.
 let chunks = stride(from: 0, to: noise.count, by: chunkSize).map {
 	Array(noise[$0..<min($0 + chunkSize, noise.count)])
 	}
